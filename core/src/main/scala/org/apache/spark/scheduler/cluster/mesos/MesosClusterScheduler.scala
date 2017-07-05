@@ -426,7 +426,8 @@ private[spark] class MesosClusterScheduler(
     val replicatedOptionsBlacklist = Set(
       "spark.jars", // Avoids duplicate classes in classpath
       "spark.submit.deployMode", // this would be set to `cluster`, but we need client
-      "spark.master" // this contains the address of the dispatcher, not master
+      "spark.master", // this contains the address of the dispatcher, not master
+      "spark.package.repositories"
     )
 
     // Assume empty main class means we're running python
@@ -434,6 +435,9 @@ private[spark] class MesosClusterScheduler(
       options ++= Seq("--class", desc.command.mainClass)
     }
 
+    desc.schedulerProperties.get("spark.package.repositories").map { v =>
+      options ++= Seq("--repositories", v)
+    }
     desc.schedulerProperties.get("spark.executor.memory").map { v =>
       options ++= Seq("--executor-memory", v)
     }
